@@ -1,4 +1,4 @@
-### evaluate_weights
+### evaluate_weights_y2
 
 #' Evaluate the weights created for your data
 #'
@@ -23,7 +23,7 @@
 #' )
 #' }
 
-evaluate_weights <- function(
+evaluate_weights_y2 <- function(
   dataset,
   ...,
   weight_var,
