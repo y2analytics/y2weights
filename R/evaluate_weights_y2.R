@@ -8,9 +8,8 @@
 #' @param dataset A dataframe to be weighted
 #' @param ... List of variables to check
 #' @param weight_var Weight variable
-#' @param nas DEFAULT = TRUE, remove NA's from calculations
-#' @param large_miss_limit DEFAULT = .05, set to different level to quickly see large discrepancies between weighted frequencies and target frequencies
-#' @param large_movement_limit DEFAULT = .1, set to different level to quickly see where weighting caused large shifts from the unweighted data 
+#' @param nas DEFAULT = TRUE, Remove NA's from calculations
+#' @param remove_missing DEFAULT = FALSE, Before running frequencies, filter out responses that are "MISSING"
 #' @export
 #' @return A tibble of compared weighting schema
 #' @examples
@@ -24,119 +23,177 @@
 #' }
 
 evaluate_weights_y2 <- function(
-  dataset,
-  ...,
-  weight_var,
-  nas = TRUE,
-  large_miss_limit = .05,
-  large_movement_limit = .1 # add new argument to change MISSING to NA
+    dataset,
+    ...,
+    weight_var,
+    nas = TRUE,
+    remove_missing = FALSE
 ){
-
+  
+  ## Stop if no weight_var provided
+  
+  if (base::missing(weight_var)) {
+    
+    stop('Argument "weight_var" is missing')
+    
+  }
+  
+  ## Get variable names
+  
   variables <-
     dataset %>%
     dplyr::select(
       ...
     ) %>%
-    names
-
-  purrr::map_dfr(
+    names()
+  
+  ## Map over eval function (combine_data())
+  
+  purrr::map(
     variables,
     ~combine_data(
       w_variable = .x,
-      keep_nas = nas,
+      nas = nas,
       dataset = dataset,
-      large_miss_limit = large_miss_limit,
-      large_movement_limit = large_movement_limit,
-      weight = {{ weight_var }}
+      weight = {{ weight_var }},
+      remove_missing = remove_missing
     )
-  )
-
+  ) %>% 
+    purrr::list_rbind()
+  
 }
-
 
 combine_data <- function(
     w_variable,
-    keep_nas,
+    nas,
     dataset,
-    large_miss_limit,
-    large_movement_limit,
-    weight
+    weight,
+    remove_missing
 ){
-
-  unweighted <-
-    dataset %>%
-    y2clerk::freq(
-      .data[[w_variable]],
-      nas = keep_nas
-    ) %>%
-    dplyr::select(
-      .data$variable,
-      .data$label,
-      unweighted_result = .data$result
-    )
-
-  weighted <-
-    dataset %>%
-    y2clerk::freq(
-      .data[[w_variable]],
-      wt = {{ weight }},
-      nas = keep_nas
-    ) %>%
-    dplyr::select(
-      .data$variable,
-      .data$label,
-      weighted_result = .data$result
-    )
-
-  n <-
-    dataset %>%
-    dplyr::count() %>%
-    dplyr::pull(
-      .data$n
+  
+  ## Unweighted freqs
+  
+  if (remove_missing == TRUE) {
+    
+    # Filter out "MISSING" values
+    
+    unweighted <-
+      dataset %>%
+      dplyr::filter(
+        .data[[w_variable]] != 'MISSING'
+      ) %>% 
+      y2clerk::freq(
+        .data[[w_variable]],
+        nas = nas
+      ) %>%
+      dplyr::select(
+        variable,
+        label,
+        unweighted_result = result
       )
-
+    
+  } else {
+    
+    # Keep "MISSING" values
+    
+    unweighted <-
+      dataset %>%
+      y2clerk::freq(
+        .data[[w_variable]],
+        nas = nas
+      ) %>%
+      dplyr::select(
+        variable,
+        label,
+        unweighted_result = result
+      )
+    
+  }
+  
+  ## Weighted freqs
+  
+  if (remove_missing == TRUE) {
+    
+    # Filter out "MISSING" values
+    
+    weighted <-
+      dataset %>%
+      dplyr::filter(
+        .data[[w_variable]] != 'MISSING'
+      ) %>% 
+      y2clerk::freq(
+        .data[[w_variable]],
+        wt = {{ weight }},
+        nas = nas
+      ) %>%
+      dplyr::select(
+        variable,
+        label,
+        weighted_result = result
+      )
+    
+  } else {
+    
+    # Keep "MISSING" values
+    
+    weighted <-
+      dataset %>%
+      y2clerk::freq(
+        .data[[w_variable]],
+        wt = {{ weight }},
+        nas = nas
+      ) %>%
+      dplyr::select(
+        variable,
+        label,
+        weighted_result = result
+      )
+    
+  }
+  
+  ## Expected results
+  
+  n <- nrow(dataset)
+  
   expected <-
     eval(
       as.symbol(
         stringr::str_c(
           w_variable,
-          '_pps'
+          '_prop_table'
         )
       )
     ) %>%
     dplyr::mutate(
       variable = w_variable,
-      target_result = round(.data$prop / .data$n, 2)
+      target_result = round(.data$prop / n, 2)
     ) %>%
     dplyr::select(
-      .data$variable,
-      label = .data[[w_variable]],
-      .data$target_result
+      variable,
+      label = 1,
+      target_result
     )
-
+  
+  ## Final combined output
+  
   unweighted %>%
     dplyr::left_join(
-      weighted,
-      by = c("variable", "label")
+      expected,
+      by = c('variable', 'label')
     ) %>%
     dplyr::left_join(
-      expected,
-      by = c("variable", "label")
+      weighted,
+      by = c('variable', 'label')
     ) %>%
     dplyr:: mutate(
-      miss_amount = round(.data$weighted_result - .data$target_result, 2),
-      large_miss = dplyr::case_when(
-        abs(.data$miss_amount) >= .data$large_miss_limit ~ '*',
-        TRUE ~ NA_character_
-        ),
       movement_amount = round(
         .data$weighted_result - .data$unweighted_result,
         2
       ),
-      large_movement = dplyr::case_when(
-        abs(.data$movement_amount) >= .data$large_movement_limit ~ '*',
-        TRUE ~ NA_character_
-      ),
+      miss_amount = round(
+        .data$weighted_result - .data$target_result, 
+        2
+      )
     )
-
+  
 }
