@@ -2,7 +2,7 @@
 
 #' Rake weights using population parameter tables
 #'
-#' Use rake_y2() in conjunction with create_prop_table_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull population parameter tables
+#' Use rake_y2() in conjunction with define_target_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull target population parameter tables from your environment that have matching names to the variables provided.
 #'
 #' @keywords freqs weights population parameters
 #' @param dataset A dataframe to be used in creating the survey design.
@@ -10,19 +10,24 @@
 #' @export
 #' @return A complex raked survey design object.
 #' @examples
-#' \dontrun{
-#' survey::svydesign(
-#' ids = ~1, 
-#' data = municipal_data
-#' )
-#'}
+#' municipal_data %>%
+#'   define_target_y2(
+#'     s_sex,
+#'     c(
+#'       '1' = .49,
+#'       '2' = .5,
+#'       '3' = .01
+#'     )
+#'   )
+#' svy_design <- municipal_data %>% 
+#'   rake_y2(
+#'     s_sex
+#'   )
 
 rake_y2 <- function(
     dataset,
     ...
-){
-  
-  # Get variable string
+) {
   
   variable_string <-
     dataset %>%
@@ -30,8 +35,6 @@ rake_y2 <- function(
       ...
     ) %>%
     names()
-  
-  # Prep variable names for function
   
   variable_list <-
     stringr::str_c(
@@ -42,12 +45,11 @@ rake_y2 <- function(
       ~as.formula(.x)
     )
   
-  # Ensure every prop_table exists
-  
+  # Ensure every target exists
   props_list <-
     stringr::str_c(
-      variable_string,
-      '_prop_table'
+      'target_',
+      variable_string
     )
   
   nonexistent <- c()
@@ -55,18 +57,15 @@ rake_y2 <- function(
   for (prop in props_list) {
     
     if (!exists(prop)) {
-      
       nonexistent <- append(nonexistent, prop)
-      
     }
     
   }
   
   if (length(nonexistent > 0)) {
-    
     stop(
       stringr::str_c(
-        'Expected prop_table(s) "',
+        'Expected target(s) "',
         paste(
           nonexistent,
           collapse = ', '
@@ -74,15 +73,13 @@ rake_y2 <- function(
         '" not found'
       )
     )
-    
   }
   
-  # Prep prop table list for function
-  
+  # Prep target table list for function
   props_list <-
     stringr::str_c(
-      variable_string,
-      '_prop_table'
+      'target_',
+      variable_string
     ) %>%
     purrr::map(
       ~eval(
@@ -92,16 +89,12 @@ rake_y2 <- function(
       )
     )
   
-  # Initialize
-  
   svy_start_weight <-
     survey::svydesign(
       ids = ~1,
       weights = NULL,
       data = dataset
     )
-  
-  # Create survey design
   
   svy_design <- 
     survey::rake(
@@ -114,8 +107,6 @@ rake_y2 <- function(
     ) %>% 
     suppressWarnings()
   
-  # Return
-  
   return(svy_design)
-  
 }
+

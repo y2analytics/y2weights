@@ -1,51 +1,45 @@
-### create_prop_table_y2
+### define_target_y2
 
-#' Create a table of population parameters to be used for weighting data
+#' Create a table of target population parameters to be used for weighting data
 #'
-#' Use create_prop_table_y2() to create nicely formatted population parameter tables to be used for weighting data. To avoid typos, create_prop_table_y2() will automatically create an object in your R environment using the provided variable to create the name. This function is designed to work within the y2weights framework.
+#' Use define_target_y2() to create a table of target population parameters to be used for weighting data. To avoid typos, define_target_y2() will automatically create an object in your R environment using the provided variable to create the name (e.g., "target_varname").
 #'
 #' @keywords freqs weights population parameters
 #' @param dataset A dataframe with variables to be used in weighting.
 #' @param variable The variable for which you will be supplying population parameters.
-#' @param population_params A named vector containing population parameters.
+#' @param population_params A named vector containing population parameters. If the variable has a "MISSING" level, you do not need to include it in the population_params, it will be calculated automatically (essentially set to weight those respondents as 1 - the mean). 
 #' @export
 #' @importFrom rlang .data
 #' @importFrom data.table :=
-#' @return A tibble of with population parameters to the environment
+#' @return A tibble with population parameters to the environment
 #' @examples
-#' municipal_data %>% 
-#' create_prop_table_y2(
-#' s_sex,
-#' c(
-#' 'Male' = .49,
-#' 'Female' = .5,
-#' 'In another way, specify if you wish' = .01
-#' )
-#' )
+#' municipal_data %>%
+#'   define_target_y2(
+#'     s_sex,
+#'     c(
+#'       '1' = .49,
+#'       '2' = .5,
+#'       '3' = .01
+#'     )
+#'   )
 
-create_prop_table_y2 <- function(
+define_target_y2 <- function(
     dataset,
     variable,
     population_params
-){
+) {
   
-  ## Get the variable as a string
-  variable_string <- 
-    deparse(
-      substitute(
-        variable
-      )
-    )
+  variable_string <- deparse(substitute(variable))
+  dataset_string <- deparse(substitute(dataset))
   
-  ## Error if population_params is unnamed
-  
-  if (!rlang::is_named(population_params)){
-    
-    stop('Population params vector is unnamed; please add levels and proportions')
-    
+  if (!rlang::is_named(population_params)) {
+    stop('population_params vector is unnamed; please add levels and proportions')
   }
   
-  ## Get var_levels for control flow
+  if (sum(stringr::str_detect(names(population_params), 'MISSING')) == 1) {
+    stop('Do not supply population_params for "MISSING" values. These are calculated automatically and weighted to 1 on this parameter')
+  }
+  
   var_levels <- dataset %>% 
     dplyr::count({{ variable }}) %>% 
     dplyr::pull({{ variable }})
@@ -53,21 +47,19 @@ create_prop_table_y2 <- function(
   ## Make the prop table when there are missing levels
   if ('MISSING' %in% var_levels) {
     
-    # Throws error if variable still has missing values
     if (NA %in% var_levels) {
-      
       stop(
         stringr::str_c(
-          'variable ',
+          'variable "',
           variable_string,
-          ' contains NA values; please set to "MISSING"'
+          '" in dataset "',
+          dataset_string,
+          '" contains NA values; please set NAs to "MISSING"'
         )
       )
-      
     }
     
-    # Table
-    prop_table <- 
+    target_table <- 
       tibble::tibble(
         {{ variable }} := 
           c(
@@ -84,21 +76,19 @@ create_prop_table_y2 <- function(
     ## Make prop table without the row for MISSING levels
   } else {
     
-    # Throws error if variable has missing values
     if (NA %in% var_levels) {
-      
       stop(
         stringr::str_c(
-          'variable ',
+          'variable "',
           variable_string,
-          ' contains NA values; please set to "MISSING"'
+          '" in dataset "',
+          dataset_string,
+          '" contains NA values; please set NAs to "MISSING"'
         )
       )
-      
     }
     
-    # Table
-    prop_table <- 
+    target_table <- 
       tibble::tibble(
         {{ variable }} := 
           population_params %>% names(),
@@ -109,10 +99,8 @@ create_prop_table_y2 <- function(
   }
   
   ## Ensure that weight groups strings are the same as the data
-  
   if (haven::is.labelled(dataset[[variable_string]])) {
     
-    # For haven labelled variables
     expected_inputs <- 
       dataset %>% 
       y2clerk::freqs(
@@ -127,7 +115,6 @@ create_prop_table_y2 <- function(
     
   } else {
     
-    # All else
     expected_inputs <- 
       dataset %>% 
       y2clerk::freqs(
@@ -143,9 +130,8 @@ create_prop_table_y2 <- function(
   }
   
   ## Ensure inputs are correct
-  
   supplied_inputs <- 
-    prop_table %>% 
+    target_table %>% 
     dplyr::arrange(
       {{ variable }}
     ) %>% 
@@ -166,38 +152,33 @@ create_prop_table_y2 <- function(
     )
   
   if (length(only_in_expected) > 0) {
-    
     stop(
       stringr::str_c(
-        'Expected inputs [',
+        'dataset levels of [',
         stringr::str_flatten(
           only_in_expected, 
           collapse = ', '
         ),
-        '] are not found in supplied inputs.'
+        '] are not found in population_params'
       )
     )
-    
   }
   
   if (length(only_in_supplied) > 0) {
-    
     stop(
       stringr::str_c(
-        'Supplied inputs [',
+        'Supplied population_params [',
         stringr::str_flatten(
           only_in_supplied, 
           collapse = ', '
         ),
-        '] are not found in expected inputs.'
+        '] are not found in the dataset'
       )
     )
-    
   }
   
   ## Check if the population_params add up to 100%
-  if (sum(population_params) != 1) {
-    
+  if (round(sum(population_params), 2) != 1.00) {
     warning(
       stringr::str_c(
         'Provided total weighting proportions is not 1. ',
@@ -205,21 +186,19 @@ create_prop_table_y2 <- function(
         sum(population_params)
       )
     )
-    
   }
   
   ## Send to environment
-  
-  prop_table_name <- 
+  target_table_name <- 
     stringr::str_c(
-      variable_string,
-      '_prop_table'
+      'target_',
+      variable_string
     )
   
   assign(
-    x = prop_table_name,
-    value = prop_table,
-    envir = .GlobalEnv
+    x = target_table_name,
+    value = target_table,
+    envir = as.environment(1)
   )
   
 }

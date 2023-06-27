@@ -1,11 +1,13 @@
 Type: Package
 Package: y2weights
 Title: Tools for weighting data
-Version: 0.0.0
+Version: 0.1.0
 Authors@R: c(
-    person('Pearce', 'Solomon', email = 'pearce@y2analytics.com', role = c('aut', 'cre')),
+    person('Canyen', 'Heimuli', email = 'canyen@y2analytics.com', role = c('aut', 'cre')),
+    person('Nick', 'Moffitt', email = 'nickmoffitt@y2analytics.com', role = 'aut'),
+    person('Pearce', 'Solomon', email = 'pearce@y2analytics.com', role = 'aut'),
     person('Y2 Analytics', role = c('cph', 'fnd')))
-Description: Tools to ease and standardize weighting allowing you to use your extra time to hit the gym.
+Description: Tools to ease and standardize weighting, allowing you to use your extra time to hit the weights at the gym.
 License: GPL-3 + file LICENSE
 URL: https://github.com/y2analytics/y2weights.git
 BugReports: https://github.com/y2analytics/y2weights/issues
@@ -14,15 +16,14 @@ Imports:
     magrittr,
     rlang,
     data.table,
+    haven,
     purrr,
     stringr,
     tibble,
     y2clerk,
-    survey,
-    tidyselect,
-    stats
+    survey
 Suggests:
     testthat
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
