@@ -7,23 +7,30 @@
 rake_y2(dataset, ...)
 }
 \arguments{
-\item{dataset}{A dataframe to be weighted}
+\item{dataset}{A dataframe to be used in creating the survey design.}
 
 \item{...}{List of variables}
 }
 \value{
-A complex survey object
+A complex raked survey design object.
 }
 \description{
-Use rake_y2() in conjunction with create_prop_table_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull population parameter tables
+Use rake_y2() in conjunction with define_target_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull target population parameter tables from your environment that have matching names to the variables provided.
 }
 \examples{
-\dontrun{
-survey::svydesign(
-ids = ~1, 
-data = municipal_data
-)
-}
+municipal_data \%>\%
+  define_target_y2(
+    s_sex,
+    c(
+      '1' = .49,
+      '2' = .5,
+      '3' = .01
+    )
+  )
+svy_design <- municipal_data \%>\% 
+  rake_y2(
+    s_sex
+  )
 }
 \keyword{freqs}
 \keyword{parameters}
