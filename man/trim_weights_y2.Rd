@@ -6,20 +6,20 @@
 \usage{
 trim_weights_y2(
   svy_design,
-  limit_method = c("percentile", "standard deviations", "decimal"),
-  upper_limit = 0.95,
-  lower_limit = 0.05,
+  limit_method = c("standard deviations", "percentile", "decimal"),
+  upper_limit = 3,
+  lower_limit = -3,
   strict = TRUE
 )
 }
 \arguments{
 \item{svy_design}{A complex raked survey design object (can be created using the rake_y2() function).}
 
-\item{limit_method}{(default = 'percentile') The type of limits that will be used for the upper_limit/lower_limit arguments. Currently accepts 'percentile', 'standard deviations', or 'decimal'.}
+\item{limit_method}{(default = 'standard deviations') The type of limits that will be used for the upper_limit/lower_limit arguments. Currently accepts 'standard deviations', 'percentile', or 'decimal'.}
 
-\item{upper_limit}{(default = 0.95) Set an upper trim limit for your weights (set to the 95th percentile of the untrimmed weights by default). If limit_method is set to 'standard deviations', limit will be the number of standard deviations above the mean to which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the upper numerical limit of the weight.}
+\item{upper_limit}{(default = 3) Set an upper trim limit for your weights (the default of 3 SDs would trim only .3\% of the weights). If limit_method is set to 'percentile', limit will be the upper percentile at which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the upper numerical limit of the weight.}
 
-\item{lower_limit}{(default = 0.05) Set a lower trim limit for your weights (set to the 5th percentile of the untrimmed weights by default). If limit_method is set to 'standard deviations', limit will be the number of standard deviations below the mean to which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the lower numerical limit of the weight.}
+\item{lower_limit}{(default = -3) Set a lower trim limit for your weights (the default of 3 SDs would trim only .3\% of the weights). If limit_method is set to 'percentile', limit will be the lower percentile at which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the lower numerical limit of the weight.}
 
 \item{strict}{(default = TRUE) The reapportionment of the ‘trimmings’ from the weights may sometimes push other weights over the limits. If strict = TRUE the function repeats the trimming iteratively to prevent this.}
 }
@@ -44,24 +44,28 @@ svy_design <- municipal_data \%>\%
     s_sex
   )
   
-#' # Default method (percentile)
+# Default method (Standard deviations)
+municipal_data$trimmed_weights <- trim_weights_y2(svy_design)
+# OR
 municipal_data \%>\% 
   dplyr::mutate(
-    trimmed_weights = trim_weights_y2(svy_design)
+    trimmed_weights = trim_weights_y2(
+      svy_design
+    )
   )
-
-# Standard deviations method
+  
+# Percentile method
 municipal_data \%>\% 
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       svy_design,
-      limit_method = 'standard deviations',
-      upper_limit = 3,
-      lower_limit = -3
+      limit_method = 'percentile',
+      upper_limit = .975,
+      lower_limit = .025
     )
   )
-
-# Standard deviations method
+  
+# Decimal method
 municipal_data \%>\% 
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
