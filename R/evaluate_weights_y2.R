@@ -72,6 +72,7 @@ combine_data <- function(
     remove_missing
 ) {
   
+  w_var_quoed <- rlang::sym(w_variable)
   ## Unweighted freqs
   if (remove_missing == TRUE) {
     # Filter out "MISSING" values
@@ -81,26 +82,26 @@ combine_data <- function(
         .data[[w_variable]] != 'MISSING'
       ) %>% 
       y2clerk::freq(
-        .data[[w_variable]],
+        !!w_var_quoed,
         nas = nas
       ) %>%
       dplyr::select(
-        .data$variable,
-        .data$label,
-        unweighted_result = .data$result
+        'variable',
+        'label',
+        result_unweighted = 'result'
       )
   } else {
     # Keep "MISSING" values
     unweighted <-
       dataset %>%
       y2clerk::freq(
-        .data[[w_variable]],
+        !!w_var_quoed,
         nas = nas
       ) %>%
       dplyr::select(
-        .data$variable,
-        .data$label,
-        unweighted_result = .data$result
+        'variable',
+        'label',
+        result_unweighted = 'result'
       )
   }
   
@@ -113,28 +114,28 @@ combine_data <- function(
         .data[[w_variable]] != 'MISSING'
       ) %>% 
       y2clerk::freq(
-        .data[[w_variable]],
+        !!w_var_quoed,
         wt = {{ weight }},
         nas = nas
       ) %>%
       dplyr::select(
-        .data$variable,
-        .data$label,
-        weighted_result = .data$result
+        'variable',
+        'label',
+        result_weighted = 'result'
       )
   } else {
     # Keep "MISSING" values
     weighted <-
       dataset %>%
       y2clerk::freq(
-        .data[[w_variable]],
+        !!w_var_quoed,
         wt = {{ weight }},
         nas = nas
       ) %>%
       dplyr::select(
-        .data$variable,
-        .data$label,
-        weighted_result = .data$result
+        'variable',
+        'label',
+        result_weighted = 'result'
       )
   }
   
@@ -151,12 +152,12 @@ combine_data <- function(
     ) %>%
     dplyr::mutate(
       variable = w_variable,
-      target_result = round(.data$prop / n, 2)
+      target = round(.data$prop / n, 2)
     ) %>%
     dplyr::select(
-      .data$variable,
+      'variable',
       label = 1,
-      .data$target_result
+      'target'
     )
   
   ## Final combined output
@@ -170,12 +171,12 @@ combine_data <- function(
       by = c('variable', 'label')
     ) %>%
     dplyr:: mutate(
-      movement_amount = round(
-        .data$weighted_result - .data$unweighted_result,
+      movement = round(
+        .data$result_weighted - .data$result_unweighted,
         2
       ),
-      miss_amount = round(
-        .data$weighted_result - .data$target_result, 
+      diff_from_target = round(
+        .data$result_weighted - .data$target, 
         2
       )
     )

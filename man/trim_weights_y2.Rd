@@ -6,7 +6,7 @@
 \usage{
 trim_weights_y2(
   svy_design,
-  limit_type = c("percentile", "standard deviations", "manual"),
+  limit_method = c("percentile", "standard deviations", "decimal"),
   upper_limit = 0.95,
   lower_limit = 0.05,
   strict = TRUE
@@ -15,11 +15,11 @@ trim_weights_y2(
 \arguments{
 \item{svy_design}{A complex raked survey design object (can be created using the rake_y2() function).}
 
-\item{limit_type}{(default = 'percentile') The type of limits that will be used for the upper_limit/lower_limit arguments. Currently accepts 'percentile', 'standard deviations', or 'manual'.}
+\item{limit_method}{(default = 'percentile') The type of limits that will be used for the upper_limit/lower_limit arguments. Currently accepts 'percentile', 'standard deviations', or 'decimal'.}
 
-\item{upper_limit}{(default = 0.95) Set an upper trim limit for your weights (set to the 95th percentile of the untrimmed weights by default). If limit_type is set to 'standard deviations', limit will be the number of standard deviations above the mean to which the weight will be trimmed. If limit_type is set to 'manual', limit will be the upper numerical limit of the weight.}
+\item{upper_limit}{(default = 0.95) Set an upper trim limit for your weights (set to the 95th percentile of the untrimmed weights by default). If limit_method is set to 'standard deviations', limit will be the number of standard deviations above the mean to which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the upper numerical limit of the weight.}
 
-\item{lower_limit}{(default = 0.05) Set a lower trim limit for your weights (set to the 5th percentile of the untrimmed weights by default). If limit_type is set to 'standard deviations', limit will be the number of standard deviations below the mean to which the weight will be trimmed. If limit_type is set to 'manual', limit will be the lower numerical limit of the weight.}
+\item{lower_limit}{(default = 0.05) Set a lower trim limit for your weights (set to the 5th percentile of the untrimmed weights by default). If limit_method is set to 'standard deviations', limit will be the number of standard deviations below the mean to which the weight will be trimmed. If limit_method is set to 'decimal', limit will be the lower numerical limit of the weight.}
 
 \item{strict}{(default = TRUE) The reapportionment of the ‘trimmings’ from the weights may sometimes push other weights over the limits. If strict = TRUE the function repeats the trimming iteratively to prevent this.}
 }
@@ -55,7 +55,7 @@ municipal_data \%>\%
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       svy_design,
-      limit_type = 'standard deviations',
+      limit_method = 'standard deviations',
       upper_limit = 3,
       lower_limit = -3
     )
@@ -66,7 +66,7 @@ municipal_data \%>\%
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       svy_design,
-      limit_type = 'manual',
+      limit_method = 'decimal',
       upper_limit = 5,
       lower_limit = 0.5
     )

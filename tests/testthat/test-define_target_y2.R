@@ -28,7 +28,7 @@ test_df <- data.frame(
 
 # Errors and Warnings -----------------------------------------------------
 
-test_that('Error: MISSING should not be in population_params', {
+test_that('Error: MISSING should not be in target_params', {
   expect_error(
     define_target_y2(
       test_df,
@@ -39,7 +39,7 @@ test_that('Error: MISSING should not be in population_params', {
         'MISSING' = .01
       )
     ),
-    'Do not supply population_params for "MISSING" values. These are calculated automatically and weighted to 1 on this parameter',
+    'Do not supply target_params for "MISSING" values. These are calculated automatically and weighted to 1 on this parameter',
     fixed = TRUE
   )
 })
@@ -58,7 +58,7 @@ test_that('Error: Unnamed Population Params', {
         '65+'
       )
     ),
-    'population_params vector is unnamed; please add levels and proportions',
+    'target_params vector is unnamed; please add levels and proportions',
     fixed = TRUE
   )
 })
@@ -100,13 +100,13 @@ test_that('Error: levels not in dataset', {
         'Other' = 0.02
       )
     ),
-    'Supplied population_params [Other] are not found in the dataset',
+    'Supplied target_params [Other] are not found in the dataset',
     fixed = TRUE
   )
 })
 
 
-test_that('Error: levels not in population_params', {
+test_that('Error: levels not in target_params', {
   expect_error(
     define_target_y2(
       test_df,
@@ -118,13 +118,13 @@ test_that('Error: levels not in population_params', {
         '55 - 64' = 0.18
       )
     ),
-    'dataset levels of [65+] are not found in population_params',
+    'dataset levels of [65+] are not found in target_params',
     fixed = TRUE
   )
 })
 
 
-test_that('Error: population_params sum', {
+test_that('Error: target_params sum', {
   expect_warning(
     define_target_y2(
       test_df,

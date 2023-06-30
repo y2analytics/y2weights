@@ -7,7 +7,7 @@
 #' @keywords freqs weights population parameters
 #' @param dataset A dataframe with variables to be used in weighting.
 #' @param variable The variable for which you will be supplying population parameters.
-#' @param population_params A named vector containing population parameters. If the variable has a "MISSING" level, you do not need to include it in the population_params, it will be calculated automatically (essentially set to weight those respondents as 1 - the mean). 
+#' @param target_params A named vector containing target parameters you wish your data to be weighted to. If the variable has a "MISSING" level, you do not need to include it in the target_params, it will be calculated automatically (essentially set to weight those respondents as 1, the mean). 
 #' @export
 #' @importFrom rlang .data
 #' @importFrom data.table :=
@@ -26,18 +26,18 @@
 define_target_y2 <- function(
     dataset,
     variable,
-    population_params
+    target_params
 ) {
   
   variable_string <- deparse(substitute(variable))
   dataset_string <- deparse(substitute(dataset))
   
-  if (!rlang::is_named(population_params)) {
-    stop('population_params vector is unnamed; please add levels and proportions')
+  if (!rlang::is_named(target_params)) {
+    stop('target_params vector is unnamed; please add levels and proportions')
   }
   
-  if (sum(stringr::str_detect(names(population_params), 'MISSING')) == 1) {
-    stop('Do not supply population_params for "MISSING" values. These are calculated automatically and weighted to 1 on this parameter')
+  if (sum(stringr::str_detect(names(target_params), 'MISSING')) == 1) {
+    stop('Do not supply target_params for "MISSING" values. These are calculated automatically and weighted to 1 on this parameter')
   }
   
   var_levels <- dataset %>% 
@@ -63,12 +63,12 @@ define_target_y2 <- function(
       tibble::tibble(
         {{ variable }} := 
           c(
-            population_params %>% names(),
+            target_params %>% names(),
             'MISSING'
           ),
         prop = 
           c(
-            population_params %>% unname() * nrow(dataset),
+            target_params %>% unname() * nrow(dataset),
             (dataset %>% dplyr::filter({{ variable }} == 'MISSING') %>% nrow())
           ) 
       )
@@ -91,9 +91,9 @@ define_target_y2 <- function(
     target_table <- 
       tibble::tibble(
         {{ variable }} := 
-          population_params %>% names(),
+          target_params %>% names(),
         prop = 
-          population_params %>% unname() * nrow(dataset)
+          target_params %>% unname() * nrow(dataset)
       ) 
     
   }
@@ -159,7 +159,7 @@ define_target_y2 <- function(
           only_in_expected, 
           collapse = ', '
         ),
-        '] are not found in population_params'
+        '] are not found in target_params'
       )
     )
   }
@@ -167,7 +167,7 @@ define_target_y2 <- function(
   if (length(only_in_supplied) > 0) {
     stop(
       stringr::str_c(
-        'Supplied population_params [',
+        'Supplied target_params [',
         stringr::str_flatten(
           only_in_supplied, 
           collapse = ', '
@@ -177,28 +177,26 @@ define_target_y2 <- function(
     )
   }
   
-  ## Check if the population_params add up to 100%
-  if (round(sum(population_params), 2) != 1.00) {
+  ## Check if the target_params add up to 100%
+  if (round(sum(target_params), 2) != 1.00) {
     warning(
       stringr::str_c(
         'Provided total weighting proportions is not 1. ',
         'The sum of the supplied proportions is ',
-        sum(population_params)
+        sum(target_params)
       )
     )
   }
   
   ## Send to environment
-  target_table_name <- 
-    stringr::str_c(
-      'target_',
-      variable_string
-    )
-  
-  assign(
-    x = target_table_name,
-    value = target_table,
+  target_list <- list(target_table)
+  names(target_list) <- stringr::str_c(
+    'target_',
+    variable_string
+  )
+  list2env(
+    x = target_list,
     envir = as.environment(1)
   )
-  
 }
+

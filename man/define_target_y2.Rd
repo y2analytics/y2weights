@@ -4,14 +4,14 @@
 \alias{define_target_y2}
 \title{Create a table of target population parameters to be used for weighting data}
 \usage{
-define_target_y2(dataset, variable, population_params)
+define_target_y2(dataset, variable, target_params)
 }
 \arguments{
 \item{dataset}{A dataframe with variables to be used in weighting.}
 
 \item{variable}{The variable for which you will be supplying population parameters.}
 
-\item{population_params}{A named vector containing population parameters. If the variable has a "MISSING" level, you do not need to include it in the population_params, it will be calculated automatically (essentially set to weight those respondents as 1 - the mean).}
+\item{target_params}{A named vector containing target parameters you wish your data to be weighted to. If the variable has a "MISSING" level, you do not need to include it in the target_params, it will be calculated automatically (essentially set to weight those respondents as 1, the mean).}
 }
 \value{
 A tibble with population parameters to the environment
