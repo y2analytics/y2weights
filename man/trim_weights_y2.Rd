@@ -5,7 +5,7 @@
 \title{Create a trimmed weights vector}
 \usage{
 trim_weights_y2(
-  svy_design,
+  weights_schema,
   limit_method = c("standard deviations", "percentile", "decimal"),
   upper_limit = 3,
   lower_limit = -3,
@@ -13,7 +13,7 @@ trim_weights_y2(
 )
 }
 \arguments{
-\item{svy_design}{A complex raked survey design object (can be created using the rake_y2() function).}
+\item{weights_schema}{A complex, raked, survey.design object (can be created using the rake_y2() function).}
 
 \item{limit_method}{(default = 'standard deviations') The type of limits that will be used for the upper_limit/lower_limit arguments. Currently accepts 'standard deviations', 'percentile', or 'decimal'.}
 
@@ -24,7 +24,7 @@ trim_weights_y2(
 \item{strict}{(default = TRUE) The reapportionment of the ‘trimmings’ from the weights may sometimes push other weights over the limits. If strict = TRUE the function repeats the trimming iteratively to prevent this.}
 }
 \value{
-A vector of trimmed weights constructed using the svy_design object
+A vector of trimmed weights constructed using the weights_schema, a survey.design object
 }
 \description{
 Use trim_weights_y2() to create a vector of trimmed weights by taking the survey design output from rake_y2() and passing it to this function.
@@ -39,18 +39,18 @@ municipal_data \%>\%
       '3' = .01
     )
   )
-svy_design <- municipal_data \%>\% 
+weights_schema <- municipal_data \%>\% 
   rake_y2(
     s_sex
   )
   
 # Default method (Standard deviations)
-municipal_data$trimmed_weights <- trim_weights_y2(svy_design)
+municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
 # OR
 municipal_data \%>\% 
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
-      svy_design
+      weights_schema
     )
   )
   
@@ -58,7 +58,7 @@ municipal_data \%>\%
 municipal_data \%>\% 
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
-      svy_design,
+      weights_schema,
       limit_method = 'percentile',
       upper_limit = .975,
       lower_limit = .025
@@ -69,7 +69,7 @@ municipal_data \%>\%
 municipal_data \%>\% 
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
-      svy_design,
+      weights_schema,
       limit_method = 'decimal',
       upper_limit = 5,
       lower_limit = 0.5

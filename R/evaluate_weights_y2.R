@@ -11,7 +11,7 @@
 #' @param nas DEFAULT = TRUE, Remove NA's from calculations
 #' @param remove_missing DEFAULT = FALSE, Before running frequencies, filter out responses that are "MISSING"
 #' @export
-#' @return A tibble of compared weighting schema
+#' @return A tibble of target population parameters
 #' @examples
 #' municipal_data %>%
 #'   define_target_y2(
@@ -22,10 +22,18 @@
 #'       '3' = .01
 #'     )
 #'   )
+#'   
+#' weights_schema <- municipal_data %>% 
+#'   rake_y2(
+#'     s_sex
+#'   )
+#'   
+#' municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
+#'   
 #' municipal_data %>% 
 #'   evaluate_weights_y2(
 #'     s_sex,
-#'     weight_var = weights
+#'     weight_var = trimmed_weights
 #'   )
 
 evaluate_weights_y2 <- function(

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rake_y2.R
 \name{rake_y2}
 \alias{rake_y2}
-\title{Rake weights using population parameter tables}
+\title{Rake weights using target parameter tables}
 \usage{
 rake_y2(dataset, ...)
 }
@@ -12,7 +12,7 @@ rake_y2(dataset, ...)
 \item{...}{List of variables}
 }
 \value{
-A complex raked survey design object.
+A complex, raked, survey.design object. This output will be used in the weights_schema argument of trim_weights_y2().
 }
 \description{
 Use rake_y2() in conjunction with define_target_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull target population parameter tables from your environment that have matching names to the variables provided.
@@ -27,7 +27,7 @@ municipal_data \%>\%
       '3' = .01
     )
   )
-svy_design <- municipal_data \%>\% 
+weights_schema <- municipal_data \%>\% 
   rake_y2(
     s_sex
   )
