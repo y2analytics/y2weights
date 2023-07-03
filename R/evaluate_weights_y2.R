@@ -2,16 +2,16 @@
 
 #' Compare weighted and unweighted data vs the ideal
 #'
-#' Use add_weights_y() to add a weight column to your data by taking the raked weights output from rake_y2() and passing it to this function.
+#' Use evaluate_weights_y2() to compare given variables on: 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target.
 #'
-#' @keywords freqs weights population parameters
+#' @keywords freqs weights target parameters
 #' @param dataset A dataframe to be weighted
 #' @param ... List of variables to check
 #' @param weight_var Weight variable
-#' @param nas DEFAULT = TRUE, Remove NA's from calculations
+#' @param nas DEFAULT = TRUE, Remove NAs from calculations
 #' @param remove_missing DEFAULT = FALSE, Before running frequencies, filter out responses that are "MISSING"
 #' @export
-#' @return A tibble of target population parameters
+#' @return A tibble with the following columns: variable, label, result_unweighted, target, result_weighted, movement, diff_from_target
 #' @examples
 #' municipal_data %>%
 #'   define_target_y2(

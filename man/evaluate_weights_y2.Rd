@@ -19,15 +19,15 @@ evaluate_weights_y2(
 
 \item{weight_var}{Weight variable}
 
-\item{nas}{DEFAULT = TRUE, Remove NA's from calculations}
+\item{nas}{DEFAULT = TRUE, Remove NAs from calculations}
 
 \item{remove_missing}{DEFAULT = FALSE, Before running frequencies, filter out responses that are "MISSING"}
 }
 \value{
-A tibble of target population parameters
+A tibble with the following columns: variable, label, result_unweighted, target, result_weighted, movement, diff_from_target
 }
 \description{
-Use add_weights_y() to add a weight column to your data by taking the raked weights output from rake_y2() and passing it to this function.
+Use evaluate_weights_y2() to compare given variables on: 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target.
 }
 \examples{
 municipal_data \%>\%
@@ -55,5 +55,5 @@ municipal_data \%>\%
 }
 \keyword{freqs}
 \keyword{parameters}
-\keyword{population}
+\keyword{target}
 \keyword{weights}
