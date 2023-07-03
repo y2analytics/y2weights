@@ -24,7 +24,7 @@ evaluate_weights_y2(
 \item{remove_missing}{DEFAULT = FALSE, Before running frequencies, filter out responses that are "MISSING"}
 }
 \value{
-A tibble of compared weighting schema
+A tibble of target population parameters
 }
 \description{
 Use add_weights_y() to add a weight column to your data by taking the raked weights output from rake_y2() and passing it to this function.
@@ -39,10 +39,18 @@ municipal_data \%>\%
       '3' = .01
     )
   )
+  
+weights_schema <- municipal_data \%>\% 
+  rake_y2(
+    s_sex
+  )
+  
+municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
+  
 municipal_data \%>\% 
   evaluate_weights_y2(
     s_sex,
-    weight_var = weights
+    weight_var = trimmed_weights
   )
 }
 \keyword{freqs}

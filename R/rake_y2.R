@@ -1,6 +1,6 @@
 ### rake_y2
 
-#' Rake weights using population parameter tables
+#' Rake weights using target parameter tables
 #'
 #' Use rake_y2() in conjunction with define_target_y2() to rake weights cleanly and with easier to understand errors. rake_y2() will automatically pull target population parameter tables from your environment that have matching names to the variables provided.
 #'
@@ -8,7 +8,7 @@
 #' @param dataset A dataframe to be used in creating the survey design.
 #' @param ... List of variables 
 #' @export
-#' @return A complex raked survey design object.
+#' @return A complex, raked, survey.design object. This output will be used in the weights_schema argument of trim_weights_y2().
 #' @examples
 #' municipal_data %>%
 #'   define_target_y2(
@@ -19,7 +19,7 @@
 #'       '3' = .01
 #'     )
 #'   )
-#' svy_design <- municipal_data %>% 
+#' weights_schema <- municipal_data %>% 
 #'   rake_y2(
 #'     s_sex
 #'   )
