@@ -55,46 +55,6 @@ test_that('Error: Missing weight_var', {
   )
 })
 
-
-test_that('Error: no table for target population', {
-  define_target_y2(
-    test_df,
-    w_sex,
-    c(
-      'Female' = 0.52,
-      'Male' = 0.48
-    )
-  )
-
-  set.seed(1)
-  svy_design <- rake_y2(
-    test_df,
-    w_sex
-  )
-  test_df$weights <- weights(svy_design)
-
-  test_df_new_var <- test_df %>% 
-    dplyr::mutate(
-      w_party = c(
-        rep('Democrat', 113),
-        rep('Republican', 375),
-        rep('Unaffiliated', 262)
-      )
-    )
-  
-  expect_error(
-    weights_eval <- evaluate_weights_y2(
-      test_df_new_var,
-      w_sex,
-      w_party,
-      weight_var = weights
-    ),
-    'object \'target_w_party\' not found',
-    fixed = TRUE
-  )
-})
-
-
 # Arguments ---------------------------------------------------------------
 
 test_that('Evaluation Keeps Missing Values', {
@@ -133,3 +93,81 @@ test_that('Evaluation Keeps Missing Values', {
   expect_true(!'MISSING' %in% var_levels_missing)
 })
 
+test_that('Correct columns for non-weighting vars', {
+  define_target_y2(
+    test_df,
+    w_sex,
+    c(
+      'Female' = 0.52,
+      'Male' = 0.48
+    )
+  )
+  
+  set.seed(1)
+  svy_design <- rake_y2(
+    test_df,
+    w_sex
+  )
+  test_df$weights <- weights(svy_design)
+  
+  test_df_new_var <- test_df %>% 
+    dplyr::mutate(
+      w_party = c(
+        rep('Democrat', 113),
+        rep('Republican', 375),
+        rep('Unaffiliated', 262)
+      )
+    )
+  
+  weights_eval <- evaluate_weights_y2(
+    test_df_new_var,
+    w_party,
+    weight_var = weights
+  )
+  
+  expect_equal(
+    colnames(weights_eval),
+    c('variable', 'label', 'result_unweighted', 'result_weighted', 'movement')
+  )
+  
+})
+
+test_that('Correct column order for mixed var types', {
+  define_target_y2(
+    test_df,
+    w_sex,
+    c(
+      'Female' = 0.52,
+      'Male' = 0.48
+    )
+  )
+  
+  set.seed(1)
+  svy_design <- rake_y2(
+    test_df,
+    w_sex
+  )
+  test_df$weights <- weights(svy_design)
+  
+  test_df_new_var <- test_df %>% 
+    dplyr::mutate(
+      w_party = c(
+        rep('Democrat', 113),
+        rep('Republican', 375),
+        rep('Unaffiliated', 262)
+      )
+    )
+  
+  weights_eval <- evaluate_weights_y2(
+    test_df_new_var,
+    w_party,
+    w_sex,
+    weight_var = weights
+  )
+    
+  expect_equal(
+    colnames(weights_eval),
+    c('variable', 'label', 'result_unweighted', 'target', 'result_weighted', 'movement', 'diff_from_target')
+  )
+  
+})
