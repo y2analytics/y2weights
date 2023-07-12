@@ -2,7 +2,7 @@
 
 #' Compare weighted and unweighted data vs the ideal
 #'
-#' Use evaluate_weights_y2() to compare given variables on: 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target.
+#' Use evaluate_weights_y2() to evaluate given variables given weighting. For variables used in weighting, compare 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target. For variables not used in weighting, can only compare 1) unweighted data, 2) weighted data, and 3) movement.
 #'
 #' @keywords freqs weights target parameters
 #' @param dataset A dataframe to be weighted
