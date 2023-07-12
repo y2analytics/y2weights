@@ -2,7 +2,7 @@
 
 #' Compare weighted and unweighted data vs the ideal
 #'
-#' Use evaluate_weights_y2() to compare given variables on: 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target.
+#' Use evaluate_weights_y2() to evaluate given variables given weighting. For variables used in weighting, compare 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target. For variables not used in weighting, can only compare 1) unweighted data, 2) weighted data, and 3) movement.
 #'
 #' @keywords freqs weights target parameters
 #' @param dataset A dataframe to be weighted
@@ -55,7 +55,7 @@ evaluate_weights_y2 <- function(
     ) %>%
     names()
   
-  purrr::map(
+  results <- purrr::map(
     variables,
     ~combine_data(
       w_variable = .x,
@@ -66,6 +66,24 @@ evaluate_weights_y2 <- function(
     )
   ) %>% 
     purrr::list_rbind()
+  
+  ## Final re-ordering if results contain weighting and non-weighting vars and non-weighting vars are first
+  if ('target' %in% colnames(results)) {
+    
+    results <- results %>% 
+      dplyr::select(
+        'variable',
+        'label',
+        'result_unweighted',
+        'target',
+        'result_weighted',
+        'movement',
+        'diff_from_target'
+      )
+    
+  }
+  
+  return(results)
   
 }
 
@@ -147,45 +165,72 @@ combine_data <- function(
       )
   }
   
-  ## Expected results
-  n <- nrow(dataset)
-  expected <-
-    eval(
-      as.symbol(
-        stringr::str_c(
-          'target_',
-          w_variable
+  ## Creates expected results only for weighting vars
+  if (exists(stringr::str_c('target_', w_variable))) {
+    
+    n <- nrow(dataset)
+    expected <-
+      eval(
+        as.symbol(
+          stringr::str_c(
+            'target_',
+            w_variable
+          )
         )
+      ) %>%
+      dplyr::mutate(
+        variable = w_variable,
+        target = round(.data$prop / n, 2)
+      ) %>%
+      dplyr::select(
+        'variable',
+        label = 1,
+        'target'
       )
-    ) %>%
-    dplyr::mutate(
-      variable = w_variable,
-      target = round(.data$prop / n, 2)
-    ) %>%
-    dplyr::select(
-      'variable',
-      label = 1,
-      'target'
-    )
+    
+  }
   
   ## Final combined output
-  unweighted %>%
-    dplyr::left_join(
-      expected,
-      by = c('variable', 'label')
-    ) %>%
-    dplyr::left_join(
-      weighted,
-      by = c('variable', 'label')
-    ) %>%
-    dplyr:: mutate(
-      movement = round(
-        .data$result_weighted - .data$result_unweighted,
-        2
-      ),
-      diff_from_target = round(
-        .data$result_weighted - .data$target, 
-        2
+  if (exists(stringr::str_c('target_', w_variable))) {
+    
+    # For weighting vars
+    results <- unweighted %>%
+      dplyr::left_join(
+        expected,
+        by = c('variable', 'label')
+      ) %>%
+      dplyr::left_join(
+        weighted,
+        by = c('variable', 'label')
+      ) %>%
+      dplyr:: mutate(
+        movement = round(
+          .data$result_weighted - .data$result_unweighted,
+          2
+        ),
+        diff_from_target = round(
+          .data$result_weighted - .data$target, 
+          2
+        )
       )
-    )
+    
+  } else {
+    
+    # For non-weighting vars
+    results <- unweighted %>%
+      dplyr::left_join(
+        weighted,
+        by = c('variable', 'label')
+      ) %>%
+      dplyr:: mutate(
+        movement = round(
+          .data$result_weighted - .data$result_unweighted,
+          2
+        )
+      )
+    
+  }
+  
+  return(results)
+  
 }
