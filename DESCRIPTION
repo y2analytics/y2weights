@@ -9,7 +9,7 @@ Authors@R: c(
     person('Y2 Analytics', role = c('cph', 'fnd')))
 Description: Tools to ease and standardize weighting, allowing you to use your extra time to hit the weights at the gym.
 License: GPL-3 + file LICENSE
-URL: https://github.com/y2analytics/y2weights.git
+URL: https://github.com/y2analytics/y2weights.git, https://y2analytics.github.io/y2weights/
 BugReports: https://github.com/y2analytics/y2weights/issues
 Imports:
     dplyr (>= 1.0.0),
