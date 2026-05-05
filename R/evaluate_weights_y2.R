@@ -22,55 +22,53 @@
 #'       '3' = .01
 #'     )
 #'   )
-#'   
-#' weights_schema <- municipal_data %>% 
+#'
+#' weights_schema <- municipal_data %>%
 #'   rake_y2(
 #'     s_sex
 #'   )
-#'   
+#'
 #' municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
-#'   
-#' municipal_data %>% 
+#'
+#' municipal_data %>%
 #'   evaluate_weights_y2(
 #'     s_sex,
 #'     weight_var = trimmed_weights
 #'   )
 
 evaluate_weights_y2 <- function(
-    dataset,
-    ...,
-    weight_var,
-    nas = TRUE,
-    remove_missing = FALSE
+  dataset,
+  ...,
+  weight_var,
+  nas = TRUE,
+  remove_missing = FALSE
 ) {
-  
   if (missing(weight_var)) {
     stop('Argument "weight_var" is missing')
   }
-  
+
   variables <-
     dataset %>%
     dplyr::select(
       ...
     ) %>%
     names()
-  
+
   results <- purrr::map(
     variables,
-    ~combine_data(
+    ~ combine_data(
       w_variable = .x,
       nas = nas,
       dataset = dataset,
       weight = {{ weight_var }},
       remove_missing = remove_missing
     )
-  ) %>% 
+  ) %>%
     purrr::list_rbind()
-  
+
   ## Final re-ordering if results contain weighting and non-weighting vars and non-weighting vars are first
   if ('target' %in% colnames(results)) {
-    
-    results <- results %>% 
+    results <- results %>%
       dplyr::select(
         'variable',
         'label',
@@ -80,24 +78,21 @@ evaluate_weights_y2 <- function(
         'movement',
         'diff_from_target'
       )
-    
   }
-  
+
   return(results)
-  
 }
 
 
 # Private functions -------------------------------------------------------
 
 combine_data <- function(
-    w_variable,
-    nas,
-    dataset,
-    weight,
-    remove_missing
+  w_variable,
+  nas,
+  dataset,
+  weight,
+  remove_missing
 ) {
-  
   w_var_quoed <- rlang::sym(w_variable)
   ## Unweighted freqs
   if (remove_missing == TRUE) {
@@ -106,7 +101,7 @@ combine_data <- function(
       dataset %>%
       dplyr::filter(
         .data[[w_variable]] != 'MISSING'
-      ) %>% 
+      ) %>%
       y2clerk::freq(
         !!w_var_quoed,
         nas = nas
@@ -130,7 +125,7 @@ combine_data <- function(
         result_unweighted = 'result'
       )
   }
-  
+
   ## Weighted freqs
   if (remove_missing == TRUE) {
     # Filter out "MISSING" values
@@ -138,7 +133,7 @@ combine_data <- function(
       dataset %>%
       dplyr::filter(
         .data[[w_variable]] != 'MISSING'
-      ) %>% 
+      ) %>%
       y2clerk::freq(
         !!w_var_quoed,
         wt = {{ weight }},
@@ -164,10 +159,9 @@ combine_data <- function(
         result_weighted = 'result'
       )
   }
-  
+
   ## Creates expected results only for weighting vars
   if (exists(stringr::str_c('target_', w_variable))) {
-    
     n <- nrow(dataset)
     expected <-
       eval(
@@ -187,12 +181,10 @@ combine_data <- function(
         label = 1,
         'target'
       )
-    
   }
-  
+
   ## Final combined output
   if (exists(stringr::str_c('target_', w_variable))) {
-    
     # For weighting vars
     results <- unweighted %>%
       dplyr::left_join(
@@ -203,34 +195,30 @@ combine_data <- function(
         weighted,
         by = c('variable', 'label')
       ) %>%
-      dplyr:: mutate(
+      dplyr::mutate(
         movement = round(
           .data$result_weighted - .data$result_unweighted,
           2
         ),
         diff_from_target = round(
-          .data$result_weighted - .data$target, 
+          .data$result_weighted - .data$target,
           2
         )
       )
-    
   } else {
-    
     # For non-weighting vars
     results <- unweighted %>%
       dplyr::left_join(
         weighted,
         by = c('variable', 'label')
       ) %>%
-      dplyr:: mutate(
+      dplyr::mutate(
         movement = round(
           .data$result_weighted - .data$result_unweighted,
           2
         )
       )
-    
   }
-  
+
   return(results)
-  
 }
