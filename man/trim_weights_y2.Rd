@@ -39,23 +39,23 @@ municipal_data \%>\%
       '3' = .01
     )
   )
-weights_schema <- municipal_data \%>\% 
+weights_schema <- municipal_data \%>\%
   rake_y2(
     s_sex
   )
-  
+
 # Default method (Standard deviations)
 municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
 # OR
-municipal_data \%>\% 
+municipal_data \%>\%
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       weights_schema
     )
   )
-  
+
 # Percentile method
-municipal_data \%>\% 
+municipal_data \%>\%
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       weights_schema,
@@ -64,9 +64,9 @@ municipal_data \%>\%
       lower_limit = .025
     )
   )
-  
+
 # Decimal method
-municipal_data \%>\% 
+municipal_data \%>\%
   dplyr::mutate(
     trimmed_weights = trim_weights_y2(
       weights_schema,
