@@ -7,21 +7,21 @@ test_df <- data.frame(
     rep('Male', 375), # 50%
     rep('Female', 368), # 49%
     rep('MISSING', 7) # 1%
-  ) %>% 
+  ) %>%
     sample(),
   w_age = c(
     rep('18 - 34', 75), # 10%
     rep('35 - 44', 150), # 20%
     rep('45 - 54', 150), # 20%
-    rep('55 - 64', 150), # 20% 
+    rep('55 - 64', 150), # 20%
     rep('65+', 225) # 30 %
-  ) %>% 
+  ) %>%
     sample(),
   w_race = c(
     rep('White', 660), # 88%
     rep('Non-white', 75), # 10%
     rep('MISSING', 15) # 2%
-  ) %>% 
+  ) %>%
     sample()
 )
 
@@ -37,16 +37,16 @@ test_that('Error: Missing weight_var', {
       'Male' = 0.48
     )
   )
-  
+
   set.seed(1)
   svy_design <- rake_y2(
     test_df,
     w_sex
   )
   test_df$weights <- weights(svy_design)
-  
+
   expect_error(
-    weights_eval <- test_df %>% 
+    weights_eval <- test_df %>%
       evaluate_weights_y2(
         w_sex
       ),
@@ -73,14 +73,14 @@ test_that('Evaluation Keeps Missing Values', {
     w_sex
   )
   test_df$weights <- weights(svy_design)
-  
+
   weights_eval <- evaluate_weights_y2(
     test_df,
     w_sex,
     weight_var = weights
   )
   var_levels_present <- weights_eval %>% dplyr::pull(label)
-  
+
   weights_eval <- evaluate_weights_y2(
     test_df,
     w_sex,
@@ -88,7 +88,7 @@ test_that('Evaluation Keeps Missing Values', {
     remove_missing = TRUE
   )
   var_levels_missing <- weights_eval %>% dplyr::pull(label)
-  
+
   expect_true('MISSING' %in% var_levels_present)
   expect_true(!'MISSING' %in% var_levels_missing)
 })
@@ -102,15 +102,15 @@ test_that('Correct columns for non-weighting vars', {
       'Male' = 0.48
     )
   )
-  
+
   set.seed(1)
   svy_design <- rake_y2(
     test_df,
     w_sex
   )
   test_df$weights <- weights(svy_design)
-  
-  test_df_new_var <- test_df %>% 
+
+  test_df_new_var <- test_df %>%
     dplyr::mutate(
       w_party = c(
         rep('Democrat', 113),
@@ -118,18 +118,17 @@ test_that('Correct columns for non-weighting vars', {
         rep('Unaffiliated', 262)
       )
     )
-  
+
   weights_eval <- evaluate_weights_y2(
     test_df_new_var,
     w_party,
     weight_var = weights
   )
-  
+
   expect_equal(
     colnames(weights_eval),
     c('variable', 'label', 'result_unweighted', 'result_weighted', 'movement')
   )
-  
 })
 
 test_that('Correct column order for mixed var types', {
@@ -141,15 +140,15 @@ test_that('Correct column order for mixed var types', {
       'Male' = 0.48
     )
   )
-  
+
   set.seed(1)
   svy_design <- rake_y2(
     test_df,
     w_sex
   )
   test_df$weights <- weights(svy_design)
-  
-  test_df_new_var <- test_df %>% 
+
+  test_df_new_var <- test_df %>%
     dplyr::mutate(
       w_party = c(
         rep('Democrat', 113),
@@ -157,17 +156,24 @@ test_that('Correct column order for mixed var types', {
         rep('Unaffiliated', 262)
       )
     )
-  
+
   weights_eval <- evaluate_weights_y2(
     test_df_new_var,
     w_party,
     w_sex,
     weight_var = weights
   )
-    
+
   expect_equal(
     colnames(weights_eval),
-    c('variable', 'label', 'result_unweighted', 'target', 'result_weighted', 'movement', 'diff_from_target')
+    c(
+      'variable',
+      'label',
+      'result_unweighted',
+      'target',
+      'result_weighted',
+      'movement',
+      'diff_from_target'
+    )
   )
-  
 })

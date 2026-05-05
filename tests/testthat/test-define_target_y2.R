@@ -7,21 +7,21 @@ test_df <- data.frame(
     rep('Male', 375), # 50%
     rep('Female', 368), # 49%
     rep('MISSING', 7) # 1%
-  ) %>% 
+  ) %>%
     sample(),
   w_age = c(
     rep('18 - 34', 75), # 10%
     rep('35 - 44', 150), # 20%
     rep('45 - 54', 150), # 20%
-    rep('55 - 64', 150), # 20% 
+    rep('55 - 64', 150), # 20%
     rep('65+', 225) # 30 %
-  ) %>% 
+  ) %>%
     sample(),
   w_race = c(
     rep('White', 660), # 88%
     rep('Non-white', 75), # 10%
     rep('MISSING', 15) # 2%
-  ) %>% 
+  ) %>%
     sample()
 )
 
@@ -65,7 +65,7 @@ test_that('Error: Unnamed Population Params', {
 
 
 test_that('Error: Stops if NA Values', {
-  test_df_with_nas <- test_df %>% 
+  test_df_with_nas <- test_df %>%
     dplyr::mutate(
       w_sex = ifelse(
         w_sex == 'MISSING',
@@ -73,7 +73,7 @@ test_that('Error: Stops if NA Values', {
         w_sex
       )
     )
-  
+
   expect_error(
     define_target_y2(
       test_df_with_nas,
@@ -140,7 +140,6 @@ test_that('Error: target_params sum', {
 })
 
 
-
 # Overall -----------------------------------------------------------------
 
 test_that('Column Names', {
@@ -152,14 +151,14 @@ test_that('Column Names', {
       'Male' = 0.48
     )
   )
-  
-  names_actual <- target_w_sex %>% 
+
+  names_actual <- target_w_sex %>%
     names()
   names_expected <- c(
     'w_sex',
     'prop'
   )
-  
+
   expect_equal(names_actual, names_expected)
 })
 
@@ -176,8 +175,8 @@ test_that('Row Names', {
       '65+' = 0.09
     )
   )
-  
-  levels_actual <- target_w_age %>% 
+
+  levels_actual <- target_w_age %>%
     dplyr::pull(w_age)
   levels_expected <- c(
     '18 - 34',
@@ -186,7 +185,7 @@ test_that('Row Names', {
     '55 - 64',
     '65+'
   )
-  
+
   expect_equal(levels_actual, levels_expected)
 })
 
@@ -200,10 +199,10 @@ test_that('Extracts "MISSING" Values', {
       'Male' = 0.45
     )
   )
-  
-  levels <- target_w_sex %>% 
+
+  levels <- target_w_sex %>%
     dplyr::pull(w_sex)
-  
+
   expect_true('MISSING' %in% levels)
 })
 
@@ -217,11 +216,11 @@ test_that('Correct Number of "MISSING" Values', {
       'Male' = 0.45
     )
   )
-  
-  n_size <- target_w_sex %>% 
-    dplyr::pull(prop) %>% 
+
+  n_size <- target_w_sex %>%
+    dplyr::pull(prop) %>%
     dplyr::nth(3)
-  
+
   expect_true(n_size == 7)
 })
 
@@ -238,12 +237,11 @@ test_that('Table Sent to Environment', {
       '65+' = 0.09
     )
   )
-  
+
   expect_true(
     exists(
-      'target_w_age', 
+      'target_w_age',
       envir = .GlobalEnv
     )
   )
 })
-
