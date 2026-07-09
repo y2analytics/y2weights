@@ -7,24 +7,23 @@ test_df <- data.frame(
     rep('Male', 375), # 50%
     rep('Female', 368), # 49%
     rep('MISSING', 7) # 1%
-  ) %>% 
+  ) %>%
     sample(),
   w_age = c(
     rep('18 - 34', 75), # 10%
     rep('35 - 44', 150), # 20%
     rep('45 - 54', 150), # 20%
-    rep('55 - 64', 150), # 20% 
+    rep('55 - 64', 150), # 20%
     rep('65+', 225) # 30 %
-  ) %>% 
+  ) %>%
     sample(),
   w_race = c(
     rep('White', 660), # 88%
     rep('Non-white', 75), # 10%
     rep('MISSING', 15) # 2%
-  ) %>% 
+  ) %>%
     sample()
 )
-
 
 
 # Overall -----------------------------------------------------------------
@@ -57,7 +56,7 @@ test_that('Right output', {
       'White' = 0.85
     )
   )
-  
+
   set.seed(1)
   svy_design <- rake_y2(
     test_df,
@@ -65,17 +64,17 @@ test_that('Right output', {
     w_age,
     w_race
   )
-  
-  test_df <- test_df %>% 
+
+  test_df <- test_df %>%
     dplyr::mutate(
       weights = weights(svy_design),
       trimmed_weights = trim_weights_y2(svy_design)
     )
   upper_expected <- quantile(test_df$weights, 0.95)
   lower_expected <- quantile(test_df$weights, 0.05)
-  upper_actual <- max(test_df$trimmed_weights) 
-  lower_actual <- min(test_df$trimmed_weights) 
-  
+  upper_actual <- max(test_df$trimmed_weights)
+  lower_actual <- min(test_df$trimmed_weights)
+
   expect_equal(
     class(test_df$trimmed_weights),
     'numeric'
@@ -85,8 +84,4 @@ test_that('Right output', {
   expect_true(lower_expected >= lower_actual)
 })
 
-
 # Arguments ---------------------------------------------------------------
-
-
-

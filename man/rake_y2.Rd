@@ -27,7 +27,7 @@ municipal_data \%>\%
       '3' = .01
     )
   )
-weights_schema <- municipal_data \%>\% 
+weights_schema <- municipal_data \%>\%
   rake_y2(
     s_sex
   )

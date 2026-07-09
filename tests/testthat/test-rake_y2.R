@@ -7,27 +7,27 @@ test_df <- data.frame(
     rep('Male', 375), # 50%
     rep('Female', 368), # 49%
     rep('MISSING', 7) # 1%
-  ) %>% 
+  ) %>%
     sample(),
   w_age = c(
     rep('18 - 34', 75), # 10%
     rep('35 - 44', 150), # 20%
     rep('45 - 54', 150), # 20%
-    rep('55 - 64', 150), # 20% 
+    rep('55 - 64', 150), # 20%
     rep('65+', 225) # 30 %
-  ) %>% 
+  ) %>%
     sample(),
   w_race = c(
     rep('White', 660), # 88%
     rep('Non-white', 75), # 10%
     rep('MISSING', 15) # 2%
-  ) %>% 
+  ) %>%
     sample(),
   w_district = c(
     rep('District 1', 250),
     rep('District 2', 250),
     rep('District 3', 250)
-  ) %>% 
+  ) %>%
     sample()
 )
 
@@ -46,9 +46,9 @@ test_that('Error: Multiple non-existent prop_tables', {
       '65+' = 0.09
     )
   )
-  
+
   expect_error(
-    svy_design <- test_df %>% 
+    svy_design <- test_df %>%
       rake_y2(
         w_age,
         w_district,
@@ -80,9 +80,9 @@ test_that('Error: Single non-existent prop_table', {
       'Male' = 0.45
     )
   )
-  
+
   expect_error(
-    svy_design <- test_df %>% 
+    svy_design <- test_df %>%
       rake_y2(
         w_age,
         w_sex,
@@ -92,7 +92,6 @@ test_that('Error: Single non-existent prop_table', {
     fixed = TRUE
   )
 })
-
 
 
 # Overall -----------------------------------------------------------------
@@ -125,13 +124,13 @@ test_that('Output structure', {
       'Non-white' = 0.45
     )
   )
-  svy_design <- test_df %>% 
+  svy_design <- test_df %>%
     rake_y2(
       w_age,
       w_sex,
       w_race
     )
-  
+
   expect_equal(
     class(svy_design),
     c('survey.design2', 'survey.design')
@@ -145,4 +144,3 @@ test_that('Output structure', {
     'numeric'
   )
 })
-

@@ -27,7 +27,7 @@ evaluate_weights_y2(
 A tibble with the following columns: variable, label, result_unweighted, target, result_weighted, movement, diff_from_target
 }
 \description{
-Use evaluate_weights_y2() to compare given variables on: 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target.
+Use evaluate_weights_y2() to evaluate given variables given weighting. For variables used in weighting, compare 1) unweighted data, 2) weighted data, 3) target weighting goals, 4) movement after weighting, and 5) difference from the target. For variables not used in weighting, can only compare 1) unweighted data, 2) weighted data, and 3) movement.
 }
 \examples{
 municipal_data \%>\%
@@ -39,15 +39,15 @@ municipal_data \%>\%
       '3' = .01
     )
   )
-  
-weights_schema <- municipal_data \%>\% 
+
+weights_schema <- municipal_data \%>\%
   rake_y2(
     s_sex
   )
-  
+
 municipal_data$trimmed_weights <- trim_weights_y2(weights_schema)
-  
-municipal_data \%>\% 
+
+municipal_data \%>\%
   evaluate_weights_y2(
     s_sex,
     weight_var = trimmed_weights
