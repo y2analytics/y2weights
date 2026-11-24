@@ -75,11 +75,7 @@ municipal_data %>%
     weight_var = trimmed_weights
   )
 #> Error in purrr::map(variables, ~combine_data(w_variable = .x, nas = nas,     dataset = dataset, weight = {        {            weight_var        }    }, remove_missing = remove_missing)): ℹ In index: 1.
-#> Caused by error in `map()`:
-#> ℹ In index: 1.
-#> Caused by error in `dplyr::count()`:
-#> ℹ In argument: `n = base::sum(trimmed_weights, na.rm = TRUE)`.
-#> ℹ In group 1: `s_sex = 1`.
-#> Caused by error:
-#> ! object 'trimmed_weights' not found
+#> Caused by error in `y2clerk::freq()`:
+#> ! `wt` column `trimmed_weights` not found in `dataset`.
+#> ℹ Did you mean: "weights"?
 ```

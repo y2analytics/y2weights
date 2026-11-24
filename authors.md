@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/y2analytics/y2weights/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/y2analytics/y2weights/blob/rc-0.1.1/DESCRIPTION)
 
 Heimuli C, Moffitt N, Solomon P (2026). *y2weights: Tools for weighting
 data*. R package version 0.1.0,
